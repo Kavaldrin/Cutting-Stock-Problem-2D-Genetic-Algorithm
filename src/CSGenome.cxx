@@ -129,21 +129,16 @@ int CSGenome::CSMutator(GAGenome& genome, float pMut)
 
     if(0.5 > dist(gen))
     {
-        std::vector<std::pair<int, Gene> > leftClosest;
-        auto& genes = castedGenome.m_genes;
-        for(unsigned idx = 0; idx < genes.size(); ++idx)
-        {
-            if(genes[idx].exists)
-            {
-                leftClosest.emplace_back(idx, genes[idx]);
-            }
-        }
 
-        std::sort(leftClosest.begin(), leftClosest.end(), 
-            [&](const auto& lhs, const auto& rhs){
-                return lhs.second.x < rhs.second.x;      
-            }
-        );
+        auto& genes = castedGenome.m_genes;
+
+        //move left
+
+        std::vector<std::pair<int, Gene> > leftClosest = 
+            GeneHelper::prepareClosestExistingSet(genes, 
+                [](const auto& lhs, const auto& rhs){
+                    return lhs.second.x < rhs.second.x;      
+            });
 
         for(unsigned i = 0; i < leftClosest.size(); ++i)
         {
@@ -186,22 +181,13 @@ int CSGenome::CSMutator(GAGenome& genome, float pMut)
             castedGenome.m_genes[index].x = gene.x;
         }
        
-        //////upper :^)
+        //move up
 
-        std::vector<std::pair<int, Gene> > upperClosest;
-        for(unsigned idx = 0; idx < genes.size(); ++idx)
-        {
-            if(genes[idx].exists)
-            {
-                upperClosest.emplace_back(idx, genes[idx]);
-            }
-        }
-
-        std::sort(upperClosest.begin(), upperClosest.end(), 
-            [&](const auto& lhs, const auto& rhs){
-                return lhs.second.y < rhs.second.y;      
-            }
-        );
+        std::vector<std::pair<int, Gene> > upperClosest = 
+        GeneHelper::prepareClosestExistingSet(genes, 
+                [](const auto& lhs, const auto& rhs){
+                    return lhs.second.y < rhs.second.y;      
+            });
 
         for(unsigned i = 0; i < upperClosest.size(); ++i)
         {

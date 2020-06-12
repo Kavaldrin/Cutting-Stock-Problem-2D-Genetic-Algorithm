@@ -2,6 +2,8 @@
 #define __UTILITIES_HXX__
 
 #include <utility>
+#include <algorithm>
+#include <vector>
 
 namespace cuttingStock
 {
@@ -43,11 +45,36 @@ public:
     static bool checkForCollision(const Gene& geneL, const Gene& geneR);
     static bool isOutside(const Gene& gene);
 
+    template <typename Comparator>
+    static std::vector< std::pair<int, Gene> > prepareClosestExistingSet(
+        const std::vector<Gene>& genes, Comparator comparator);
+
     static Rect boardSize;
 private:
     GeneHelper() = delete;
 
 };
+
+
+//////////// TEMPLATE IMPL //////////////
+template <typename Comparator>
+std::vector< std::pair<int, Gene> > GeneHelper::prepareClosestExistingSet(
+        const std::vector<Gene>& genes, Comparator comparator)
+
+{
+    std::vector< std::pair<int, Gene> > closestSet; closestSet.reserve(genes.size());
+    for(unsigned idx = 0; idx < genes.size(); ++idx)
+    {
+        if(genes[idx].exists)
+        {
+            closestSet.emplace_back(idx, genes[idx]);
+        }
+    }
+    std::sort(closestSet.begin(), closestSet.end(), comparator);
+    return closestSet;
+}
+
+
 
 
 
