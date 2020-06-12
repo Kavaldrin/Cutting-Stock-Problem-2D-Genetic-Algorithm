@@ -147,8 +147,6 @@ int CSGenome::CSMutator(GAGenome& genome, float pMut)
 
         for(unsigned i = 0; i < leftClosest.size(); ++i)
         {
-            auto currentHeight = leftClosest[i].second.getFixedHeight();
-            auto currentWidth = leftClosest[i].second.getFixedWidth();
 
             std::set<int> possibleXes;
             possibleXes.insert(0);
@@ -163,16 +161,13 @@ int CSGenome::CSMutator(GAGenome& genome, float pMut)
                 for(unsigned j = 0; j < leftClosest.size(); ++j)
                 {
 
-                    if(i == j){ continue; }
+                    if(i == j){ continue; } 
 
-                    auto otherHeight = leftClosest[j].second.getFixedHeight();
-                    auto otherWidth = leftClosest[j].second.getFixedWidth();
+                    Gene tempGene = leftClosest[i].second;
+                    tempGene.x = possibleX;       
 
-                    if(!((leftClosest[j].second.x >= possibleX + currentWidth 
-                    || possibleX >= leftClosest[j].second.x + otherWidth
-                    || leftClosest[j].second.y >= leftClosest[i].second.y + currentHeight 
-                    || leftClosest[i].second.y >= leftClosest[j].second.y + otherHeight)
-                    && (possibleX + currentWidth < castedGenome.m_boardSize.width && leftClosest[i].second.y + currentHeight < castedGenome.m_boardSize.height)))
+                    if(GeneHelper::checkForCollision(tempGene, leftClosest[j].second) 
+                        || GeneHelper::isOutside(tempGene))
                     {
                         isColision = true;
                         break;
@@ -210,9 +205,6 @@ int CSGenome::CSMutator(GAGenome& genome, float pMut)
 
         for(unsigned i = 0; i < upperClosest.size(); ++i)
         {
-            auto currentHeight = upperClosest[i].second.getFixedHeight();
-            auto currentWidth = upperClosest[i].second.getFixedWidth();
-
             std::set<int> possibleYes;
             possibleYes.insert(0);
             for(auto& gene : upperClosest)
@@ -227,14 +219,11 @@ int CSGenome::CSMutator(GAGenome& genome, float pMut)
                 {
                     if(i == j){ continue; }
 
-                    auto otherHeight = upperClosest[j].second.getFixedHeight();
-                    auto otherWidth = upperClosest[j].second.getFixedWidth();
+                    Gene tempGene = upperClosest[i].second;
+                    tempGene.y = possibleY;
 
-                    if(!((upperClosest[j].second.x >= upperClosest[i].second.x + currentWidth 
-                    || upperClosest[i].second.x >= upperClosest[j].second.x + otherWidth
-                    || upperClosest[j].second.y >= possibleY + currentHeight 
-                    || possibleY >= upperClosest[j].second.y + otherHeight)
-                    && (upperClosest[i].second.x + currentWidth < castedGenome.m_boardSize.width && possibleY + currentHeight < castedGenome.m_boardSize.height)))
+                    if(GeneHelper::checkForCollision(tempGene, upperClosest[j].second) 
+                        || GeneHelper::isOutside(tempGene))
                     {
                         isColision = true;
                         break;
