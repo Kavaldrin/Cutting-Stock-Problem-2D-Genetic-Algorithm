@@ -17,19 +17,19 @@ CSGenome::CSGenome(std::vector<Rect>& rectangles, const Rect& boardSize) : m_boa
     crossover(CSCrossover);
     mutator(CSMutator);
     comparator(CSComparator);
-    evaluator(CSEvaluatorWithoutPenalties);
+    evaluator(CSEvaluator);
 }
 
 void CSGenome::CSInitializer(GAGenome& genome)
 {
     CSGenome& castedGenome = dynamic_cast<CSGenome&>(genome);
 
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<> realDist(0,1);
-    std::uniform_int_distribution<> indexDist(0, castedGenome.m_genes.size() - 1);
-    std::uniform_int_distribution<> widthDist(0, castedGenome.m_boardSize.width - 1);
-    std::uniform_int_distribution<> heightDist(0, castedGenome.m_boardSize.height - 1);
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    static std::uniform_real_distribution<> realDist(0,1);
+    static std::uniform_int_distribution<> indexDist(0, castedGenome.m_genes.size() - 1);
+    static std::uniform_int_distribution<> widthDist(0, castedGenome.m_boardSize.width - 1);
+    static std::uniform_int_distribution<> heightDist(0, castedGenome.m_boardSize.height - 1);
 
     for(auto& gene : castedGenome.m_genes)
     {
@@ -48,16 +48,16 @@ void CSGenome::CSInitializer(GAGenome& genome)
     castedGenome._evaluated = gaFalse;
 }
 
-//prowizoryczny one point
 int CSGenome::CSCrossover(const GAGenome& mother, const GAGenome& father, GAGenome* bro, GAGenome* sis)
 {
     const CSGenome& castedMother = dynamic_cast<const CSGenome&>(mother);
     const CSGenome& castedFather = dynamic_cast<const CSGenome&>(father);
 
-    int setSize = castedFather.m_genes.size();
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<> cutDist(1, setSize - 1);
+    static int setSize = castedFather.m_genes.size();
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    static std::uniform_real_distribution<> cutDist(1, setSize - 1);
+
     int nc = 0;
 
     int partition = cutDist(gen);
@@ -98,10 +98,10 @@ int CSGenome::CSCrossover(const GAGenome& mother, const GAGenome& father, GAGeno
 
 int CSGenome::CSMutator(GAGenome& genome, float pMut)
 {
-    std::random_device rnd;
-    std::mt19937 gen(rnd());
-    std::uniform_real_distribution<> dist;
-    std::normal_distribution<> stepDist(0, 100);
+    static std::random_device rnd;
+    static std::mt19937 gen(rnd());
+    static std::uniform_real_distribution<> dist;
+    static std::normal_distribution<> stepDist(0, 100);
 
     int nc = 0;
     CSGenome& castedGenome = dynamic_cast<CSGenome&>(genome);
@@ -145,17 +145,16 @@ int CSGenome::CSMutator(GAGenome& genome, float pMut)
             }
         );
 
-
         for(unsigned i = 0; i < leftClosest.size(); ++i)
         {
-            auto currentHeight = leftClosest[i].second.rotated ? leftClosest[i].second.rect.width : leftClosest[i].second.rect.height;
-            auto currentWidth = leftClosest[i].second.rotated ? leftClosest[i].second.rect.height : leftClosest[i].second.rect.width;
+            auto currentHeight = leftClosest[i].second.getFixedHeight();
+            auto currentWidth = leftClosest[i].second.getFixedWidth();
 
             std::set<int> possibleXes;
             possibleXes.insert(0);
             for(auto& gene : leftClosest)
             {
-                possibleXes.insert(gene.second.x + (gene.second.rotated ? gene.second.rect.height : gene.second.rect.width));
+                possibleXes.insert(gene.second.x + gene.second.getFixedWidth());
             }
             
             for(const auto& possibleX : possibleXes)
@@ -166,8 +165,8 @@ int CSGenome::CSMutator(GAGenome& genome, float pMut)
 
                     if(i == j){ continue; }
 
-                    auto otherHeight = leftClosest[j].second.rotated ? leftClosest[j].second.rect.width : leftClosest[j].second.rect.height;
-                    auto otherWidth = leftClosest[j].second.rotated ? leftClosest[j].second.rect.height : leftClosest[j].second.rect.width;
+                    auto otherHeight = leftClosest[j].second.getFixedHeight();
+                    auto otherWidth = leftClosest[j].second.getFixedWidth();
 
                     if(!((leftClosest[j].second.x >= possibleX + currentWidth 
                     || possibleX >= leftClosest[j].second.x + otherWidth
@@ -192,7 +191,7 @@ int CSGenome::CSMutator(GAGenome& genome, float pMut)
             castedGenome.m_genes[index].x = gene.x;
         }
        
-        //////uppper :^)
+        //////upper :^)
 
         std::vector<std::pair<int, Gene> > upperClosest;
         for(unsigned idx = 0; idx < genes.size(); ++idx)
@@ -211,14 +210,14 @@ int CSGenome::CSMutator(GAGenome& genome, float pMut)
 
         for(unsigned i = 0; i < upperClosest.size(); ++i)
         {
-            auto currentHeight = upperClosest[i].second.rotated ? upperClosest[i].second.rect.width : upperClosest[i].second.rect.height;
-            auto currentWidth = upperClosest[i].second.rotated ? upperClosest[i].second.rect.height : upperClosest[i].second.rect.width;
+            auto currentHeight = upperClosest[i].second.getFixedHeight();
+            auto currentWidth = upperClosest[i].second.getFixedWidth();
 
             std::set<int> possibleYes;
             possibleYes.insert(0);
             for(auto& gene : upperClosest)
             {
-                possibleYes.insert(gene.second.y + (gene.second.rotated ? gene.second.rect.width : gene.second.rect.height));
+                possibleYes.insert(gene.second.y + gene.second.getFixedHeight());
             }
             
             for(const auto& possibleY : possibleYes)
@@ -226,11 +225,10 @@ int CSGenome::CSMutator(GAGenome& genome, float pMut)
                 auto isColision = false;
                 for(unsigned j = 0; j < upperClosest.size(); ++j)
                 {
-
                     if(i == j){ continue; }
 
-                    auto otherHeight = upperClosest[j].second.rotated ? upperClosest[j].second.rect.width : upperClosest[j].second.rect.height;
-                    auto otherWidth = upperClosest[j].second.rotated ? upperClosest[j].second.rect.height : upperClosest[j].second.rect.width;
+                    auto otherHeight = upperClosest[j].second.getFixedHeight();
+                    auto otherWidth = upperClosest[j].second.getFixedWidth();
 
                     if(!((upperClosest[j].second.x >= upperClosest[i].second.x + currentWidth 
                     || upperClosest[i].second.x >= upperClosest[j].second.x + otherWidth
@@ -254,7 +252,6 @@ int CSGenome::CSMutator(GAGenome& genome, float pMut)
         {
             castedGenome.m_genes[index].y = gene.y;
         }
-        
     }
 
     castedGenome._evaluated = gaFalse;
@@ -267,7 +264,7 @@ float CSGenome::CSComparator(const GAGenome& bro, const GAGenome& sis)
     const CSGenome& castedBro = dynamic_cast<const CSGenome&>(bro);
     const CSGenome& castedSis = dynamic_cast<const CSGenome&>(sis);
 
-    int sizeSet = castedBro.m_genes.size();
+    static int sizeSet = castedBro.m_genes.size();
     int theSame = 0;
 
     for(int idx = 0; idx < sizeSet; ++idx)
@@ -278,30 +275,20 @@ float CSGenome::CSComparator(const GAGenome& bro, const GAGenome& sis)
     return theSame / static_cast<float>(sizeSet); 
 }
 
+
 float CSGenome::CSEvaluator(GAGenome& genome)
 {
-    
-    return 0;
-}
-
-
-float CSGenome::CSEvaluatorWithoutPenalties(GAGenome& genome)
-{
     CSGenome& castedGenome = dynamic_cast<CSGenome&>(genome);
-    int max_area = castedGenome.m_boardSize.height * castedGenome.m_boardSize.width;
+    static int max_area = castedGenome.m_boardSize.area();
     int area = 0;
 
     auto& gens = castedGenome.m_genes;
     for(unsigned i = 0; i < gens.size(); ++i)
     {
         if(! gens[i].exists ){ continue; }
-        int current_area = gens[i].rect.width * gens[i].rect.height;
-        int currentWidth = gens[i].rotated ? gens[i].rect.height : gens[i].rect.width;
-        int currentHeight = gens[i].rotated ? gens[i].rect.width : gens[i].rect.height;
+        int current_area = gens[i].rect.area();
 
-        if(gens[i].x + currentWidth > castedGenome.m_boardSize.width
-          || gens[i].y + currentHeight > castedGenome.m_boardSize.height
-          || gens[i].x < 0 || gens[i].y < 0)
+        if(GeneHelper::isOutside(gens[i]))
         {
             return 0;
         }
@@ -311,11 +298,7 @@ float CSGenome::CSEvaluatorWithoutPenalties(GAGenome& genome)
             if(j == i) { continue; }
             if(! gens[j].exists){ continue; }
 
-            int otherWidth = gens[j].rotated ? gens[j].rect.height : gens[j].rect.width;
-            int otherHeight = gens[j].rotated ? gens[j].rect.width : gens[j].rect.height;
-
-            if(! (gens[j].x >= gens[i].x + currentWidth || gens[i].x >= gens[j].x + otherWidth
-                || gens[j].y >= gens[i].y + currentHeight || gens[i].y >= gens[j].y + otherHeight))
+            if(GeneHelper::checkForCollision(gens[i], gens[j]))
             {
                 return 0;
             }
@@ -360,7 +343,6 @@ int CSGenome::computeArea() const
 
 int CSGenome::getMaxArea() const
 {
-    
     static const int maxArea = m_boardSize.height * m_boardSize.width;
     return maxArea;
 }

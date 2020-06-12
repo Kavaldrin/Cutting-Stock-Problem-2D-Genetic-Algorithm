@@ -28,6 +28,7 @@ int main(int argc, char** argv)
             << std::endl; 
     }
 
+    GeneHelper::boardSize = Rect{2800, 2070};
     CSGenome genome(input, Rect{2800, 2070});
     genome.initialize();
 

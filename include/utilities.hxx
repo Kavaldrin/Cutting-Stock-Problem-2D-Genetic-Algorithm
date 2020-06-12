@@ -1,6 +1,7 @@
 #ifndef __UTILITIES_HXX__
 #define __UTILITIES_HXX__
 
+#include <utility>
 
 namespace cuttingStock
 {
@@ -20,7 +21,10 @@ struct Gene
     int y;
     bool rotated;
     bool exists;
-    
+
+    int getFixedWidth() const { return rotated ? rect.height : rect.width; }
+    int getFixedHeight() const { return rotated ? rect.width : rect.height; }
+
     friend bool operator==(const Gene& lhs, const Gene& rhs)
     {
         return lhs.rect.width == rhs.rect.width &&
@@ -32,6 +36,18 @@ struct Gene
     }
 };
 
+class GeneHelper
+{
+public:
+
+    static bool checkForCollision(const Gene& geneL, const Gene& geneR);
+    static bool isOutside(const Gene& gene);
+
+    static Rect boardSize;
+private:
+    GeneHelper() = delete;
+
+};
 
 
 

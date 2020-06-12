@@ -20,7 +20,6 @@ public:
     static int CSMutator(GAGenome&, float);
     static float CSComparator(const GAGenome&, const GAGenome& );
     static float CSEvaluator(GAGenome& );
-    static float CSEvaluatorWithoutPenalties(GAGenome& );
 
 public:
     CSGenome(const CSGenome& orig);
