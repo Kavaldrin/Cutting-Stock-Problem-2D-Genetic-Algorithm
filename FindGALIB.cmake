@@ -15,7 +15,6 @@ FIND_PATH(GALIB_INCLUDE_DIR
   PATHS
   /usr/include
   /usr/local/include
-  /home/stud2016/6filus/algorytmy_genetyczne/Projekt/GALib
   DOC "Google PerfTools header location"
 )
 
@@ -28,7 +27,6 @@ FIND_LIBRARY(GALIB_LIBRARY
   PATHS
   /usr/lib
   /usr/local/lib
-  /home/stud2016/6filus/algorytmy_genetyczne/Projekt/GALib
   DOC "Google PerfTools library location"
 )
 

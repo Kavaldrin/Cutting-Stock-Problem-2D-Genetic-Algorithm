@@ -155,7 +155,6 @@ int CSGenome::CSMutator(GAGenome& genome, float pMut)
                 auto isColision = false;
                 for(unsigned j = 0; j < leftClosest.size(); ++j)
                 {
-
                     if(i == j){ continue; } 
 
                     Gene tempGene = leftClosest[i].second;
