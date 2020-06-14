@@ -305,12 +305,14 @@ void CSGenome::copy(const GAGenome& orig)
 int CSGenome::computeArea() const
 {
     int area = 0;
+    unsigned int idx = 0;
     for(const auto& gene : m_genes)
     {
-        if(gene.exists)
+        if(gene.exists && !GeneHelper::checkForAllCollisions(idx, m_genes) && !GeneHelper::isOutside(gene))
         {
             area += gene.rect.area();
         }
+        ++idx;
     }
     return area;
 }

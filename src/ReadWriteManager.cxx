@@ -16,6 +16,7 @@ std::vector<Rect> ReadWriteManager::readInputFile(const std::string& path)
     std::string line;
     while(std::getline(file, line))
     {
+        if(line == "") { break; }
         std::istringstream iss(line);
         std::vector<std::string> results(std::istream_iterator<std::string>{iss},
                                         std::istream_iterator<std::string>() );
@@ -27,17 +28,18 @@ std::vector<Rect> ReadWriteManager::readInputFile(const std::string& path)
     return res;
 }
 
-void ReadWriteManager::saveOutputFile(const int& area, const std::vector<Gene>& result, const std::string& path)
+void ReadWriteManager::saveOutputFile(const int area, const std::vector<Gene>& result, const std::string& path)
 {
 
     std::ofstream file(path, std::ios::out);
     if(! file.is_open()){ std::cout << "Cannot open/create output.txt file" << std::endl; }
 
     file << area << std::endl;
+    unsigned idx = 0;
     for(const auto& gene : result)
     {
         file << gene.rect.width << " " << gene.rect.height << " ";
-        if(gene.exists)
+        if(gene.exists && !GeneHelper::checkForAllCollisions(idx, result) && !GeneHelper::isOutside(gene))
         {
             file << gene.x << " " << gene.y << " ";
         }
@@ -47,6 +49,7 @@ void ReadWriteManager::saveOutputFile(const int& area, const std::vector<Gene>& 
         }
 
         file << (gene.rotated ? 1 : 0) << std::endl;
+        ++idx;
     }
     
     file.close();

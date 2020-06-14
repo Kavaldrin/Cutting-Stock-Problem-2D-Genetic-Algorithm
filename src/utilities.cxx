@@ -18,3 +18,16 @@ bool GeneHelper::isOutside(const Gene& gene)
         || gene.y + gene.getFixedHeight() > boardSize.height
         || gene.x < 0 || gene.y < 0;
 }
+
+bool GeneHelper::checkForAllCollisions(unsigned int idx, const std::vector<Gene>& genes)
+{
+    for(unsigned int i = 0; i < genes.size(); ++i)
+    {
+        if(idx == i || !genes[i].exists){ continue; }
+        if(checkForCollision(genes[idx], genes[i]))
+        {
+            return true;
+        }
+    }
+    return false;
+}

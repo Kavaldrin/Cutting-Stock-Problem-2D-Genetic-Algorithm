@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(Zad1)
+project(CSSolver)
 
 
 add_definitions("-Wall -Werror -O2 -pedantic-errors -fpermissive")
@@ -14,9 +14,9 @@ include_directories(${PROJECT_SOURCE_DIR}/include
 file(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/src/*.cxx)
 
 
-add_executable(Zad1 ${SRC_FILES} )
-target_link_libraries(Zad1 ${GALIB_LIBRARIES} -static)
+add_executable(CSSolver ${SRC_FILES} )
+target_link_libraries(CSSolver ${GALIB_LIBRARIES} -static)
 
-set_target_properties(Zad1 PROPERTIES
+set_target_properties(CSSolver PROPERTIES
                         CXX_STANDARD 17
                         CXX_STANDARD_REQUIRED YES)

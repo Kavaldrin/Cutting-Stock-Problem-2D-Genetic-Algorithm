@@ -43,6 +43,7 @@ class GeneHelper
 public:
 
     static bool checkForCollision(const Gene& geneL, const Gene& geneR);
+    static bool checkForAllCollisions(unsigned int idx, const std::vector<Gene>& genes); 
     static bool isOutside(const Gene& gene);
 
     template <typename Comparator>
